@@ -4,16 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ExerciseView extends JFrame {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	// Labels principales
+    private static final long serialVersionUID = 1L;
+
+    // Labels principales
     public JLabel lblWorkoutTimer;
     public JLabel lblWorkoutName;
     public JLabel lblExerciseName;
     public JLabel lblExerciseDesc;
+
+    // Cronómetros
     public JLabel lblExerciseTimer;
+    public JLabel lblSetTimer;
     public JLabel lblRestTimer;
 
     // Tabla de sets
@@ -29,7 +30,7 @@ public class ExerciseView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Panel superior (cronómetro global y datos del ejercicio)
+        // Panel superior (información del workout y ejercicio)
         JPanel topPanel = new JPanel(new GridLayout(4, 1));
         lblWorkoutTimer = new JLabel("Cronómetro Workout: 00:00", SwingConstants.CENTER);
         lblWorkoutName = new JLabel("Workout: ---", SwingConstants.CENTER);
@@ -41,11 +42,14 @@ public class ExerciseView extends JFrame {
         topPanel.add(lblExerciseName);
         topPanel.add(lblExerciseDesc);
 
-        // Panel lateral (cronómetros de ejercicio y descanso)
-        JPanel sidePanel = new JPanel(new GridLayout(2, 1));
+        // Panel lateral (cronómetros: ejercicio, set y descanso)
+        JPanel sidePanel = new JPanel(new GridLayout(3, 1, 5, 5));
         lblExerciseTimer = new JLabel("Tiempo Ejercicio: 00:00", SwingConstants.CENTER);
+        lblSetTimer = new JLabel("Set: 00:00", SwingConstants.CENTER);
         lblRestTimer = new JLabel("Descanso: --:--", SwingConstants.CENTER);
+
         sidePanel.add(lblExerciseTimer);
+        sidePanel.add(lblSetTimer);
         sidePanel.add(lblRestTimer);
 
         // Tabla de sets
@@ -63,7 +67,7 @@ public class ExerciseView extends JFrame {
         bottomPanel.add(btnExit);
 
         // Layout principal
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
         add(topPanel, BorderLayout.NORTH);
         add(sidePanel, BorderLayout.WEST);
         add(scrollSets, BorderLayout.CENTER);
