@@ -51,13 +51,11 @@ public class HistoricoService {
         for (DocumentSnapshot doc : snapshot.getDocuments()) {
             Historico h = doc.toObject(Historico.class);
             if (h != null) {
-                // asignar el id del documento para poder ordenar
                 h.setId(doc.getId());
                 result.add(h);
             }
         }
 
-        // Ordenar por id descendente (últimos creados primero)
         result.sort((a, b) -> b.getId().compareTo(a.getId()));
 
         return result;

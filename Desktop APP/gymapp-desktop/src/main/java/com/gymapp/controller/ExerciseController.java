@@ -207,7 +207,6 @@ public class ExerciseController {
     }
 
     public void onExerciseFinished() {
-        // Hook para que WorkoutController avance
     }
 
     private String formatTime(int seconds) {

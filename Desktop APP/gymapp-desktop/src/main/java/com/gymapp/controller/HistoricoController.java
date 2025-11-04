@@ -40,7 +40,6 @@ public class HistoricoController {
                         tiempoEstimado,
                         h.getCompletionProgress() + "%"
                 };
-                // 👇 en vez de addRow(row), insertamos siempre en la primera posición
                 model.insertRow(0, row);
             }
 

@@ -6,14 +6,14 @@ public class MainView extends JFrame {
     public JButton btnWorkouts;
     public JButton btnHistory;
     public JButton btnExit;
-    public JLabel lblWelcome; // 🔑 ahora es atributo accesible
+    public JLabel lblWelcome; 
 
     public MainView(String userName) {
         setTitle("Menú Principal - RetoGym");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
-        setLocationRelativeTo(null); // centrar ventana
+        setLocationRelativeTo(null); 
 
         lblWelcome = new JLabel("Bienvenido, " + userName);
         lblWelcome.setBounds(100, 30, 250, 25);

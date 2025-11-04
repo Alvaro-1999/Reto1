@@ -15,7 +15,6 @@ public class UserResource {
     }
 
     public void save(User user) throws Exception {
-        // Guarda el objeto completo, usando el login como ID del documento
         db.collection("users")
           .document(user.getLogin())
           .set(user)
@@ -30,7 +29,7 @@ public class UserResource {
         if (doc.exists()) {
             User found = doc.toObject(User.class);
             if (found != null) {
-                found.setId(doc.getId()); // 👈 ahora guardamos el documentId en el campo id
+                found.setId(doc.getId()); 
             }
             return found;
         }
@@ -43,7 +42,7 @@ public class UserResource {
         for (QueryDocumentSnapshot doc : future.get().getDocuments()) {
             User user = doc.toObject(User.class);
             if (user != null) {
-                user.setId(doc.getId()); // 👈 asignamos el documentId al campo id
+                user.setId(doc.getId()); 
                 users.add(user);
             }
         }
@@ -51,7 +50,7 @@ public class UserResource {
     }
 
     public void update(User user) throws Exception {
-        save(user); // Reutiliza el método save para actualizar
+        save(user); 
     }
 
     public void delete(User user) throws Exception {
