@@ -3,11 +3,7 @@ package com.gymapp.view;
 import javax.swing.*;
 
 public class MainView extends JFrame {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public JButton btnWorkouts;
+    public JButton btnWorkouts;
     public JButton btnHistory;
     public JButton btnExit;
     public JLabel lblWelcome; // 🔑 ahora es atributo accesible

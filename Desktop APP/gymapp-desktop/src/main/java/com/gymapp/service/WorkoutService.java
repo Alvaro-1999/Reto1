@@ -20,7 +20,7 @@ public class WorkoutService {
         return this.db;
     }
 
-    // 🔍 Obtener todos los workouts
+    //  Obtener todos los workouts
     public List<Workout> findAll() throws Exception {
         List<Workout> workouts = new ArrayList<>();
         for (DocumentSnapshot doc : db.collection("workouts").get().get().getDocuments()) {
@@ -33,7 +33,7 @@ public class WorkoutService {
         return workouts;
     }
 
-    // 🔍 Filtrar workouts por nivel
+    //  Filtrar workouts por nivel
     public List<Workout> findByLevelOrBelow(int userLevel) throws Exception {
         List<Workout> result = new ArrayList<>();
         for (Workout w : findAll()) {
@@ -44,7 +44,7 @@ public class WorkoutService {
         return result;
     }
 
-    // 🔍 Obtener todos los sets de un workout (recorriendo sus ejercicios)
+    //  Obtener todos los sets de un workout (recorriendo sus ejercicios)
     public List<Set> getSetsFromWorkout(Workout workout) throws Exception {
         List<Set> sets = new ArrayList<>();
 
@@ -73,7 +73,7 @@ public class WorkoutService {
         return sets;
     }
 
-    // ✅ NUEVO: Obtener todos los ejercicios asociados a un workout
+    //  Obtener todos los ejercicios asociados a un workout
     public List<Exercise> getExercisesFromWorkout(Workout workout) throws Exception {
         List<Exercise> exercises = new ArrayList<>();
 

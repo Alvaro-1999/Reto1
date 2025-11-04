@@ -1,16 +1,11 @@
 package com.gymapp.view;
 
 import com.gymapp.model.Workout;
-
 import javax.swing.*;
 import java.util.List;
 
 public class WorkoutView extends JFrame {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public JList<String> listWorkouts;
+    public JList<String> listWorkouts;
     public JTable tableExercises;
     public JButton btnShowSets;
 
@@ -55,9 +50,12 @@ public class WorkoutView extends JFrame {
         return workouts;
     }
 
+    // Ahora solo muestra Nombre y Descripción
     public void updateExerciseTable(List<String[]> rows) {
-        String[] columns = {"Nombre", "Descripción", "Descanso"};
-        String[][] data = rows.toArray(new String[0][]);
+        String[] columns = {"Nombre", "Descripción"};
+        String[][] data = rows.stream()
+                .map(r -> new String[]{ r[0], r[1] })
+                .toArray(String[][]::new);
         tableExercises.setModel(new javax.swing.table.DefaultTableModel(data, columns));
     }
 }

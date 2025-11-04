@@ -4,11 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class HistoricoView extends JFrame {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public JTable tableHistorico;
+    public JTable tableHistorico;
     public JButton btnClose;
 
     public HistoricoView() {
@@ -17,10 +13,8 @@ public class HistoricoView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Definir columnas
-        String[] columnNames = {"Nombre", "Fecha", "Nivel", "Tiempo estimado", "%", "Tiempo total"};
+        String[] columnNames = {"Nombre", "Fecha", "Nivel", "Tiempo estimado", "Progreso (%)"};
 
-        // Modelo vacío al inicio
         Object[][] data = {};
 
         tableHistorico = new JTable(data, columnNames);

@@ -1,5 +1,5 @@
 package com.gymapp.controller;
-
+//o
 import com.gymapp.model.Exercise;
 import com.gymapp.model.Set;
 import com.gymapp.model.User;
@@ -22,8 +22,7 @@ public class ExerciseController {
 
     private int currentSetIndex = 0;
 
-    private final int descansoSegundos = 10;      // Descanso entre sets
-    private final int pausaSerieSegundos = 5;     // Mini-pausa opcional entre series
+    private final int pausaSerieSegundos = 5;     // Pausa previa antes de cada set (siempre aplicada)
 
     private Cronometro cronometroEjercicio;
     private Cronometro cronometroSet;
@@ -57,14 +56,16 @@ public class ExerciseController {
             exercise.setSets(sets);
         }
 
-        Object[][] data = new Object[sets.size()][3];
+        // Ahora la tabla tiene 4 columnas: Set, Reps, Tiempo (set), Descanso (ejercicio)
+        String[] cols = {"Set", "Reps", "Tiempo", "Descanso"};
+        Object[][] data = new Object[sets.size()][cols.length];
         for (int i = 0; i < sets.size(); i++) {
             Set s = sets.get(i);
             data[i][0] = s.getName();
             data[i][1] = s.getReps();
             data[i][2] = s.getTime() + " seg";
+            data[i][3] = exercise.getRest() + " seg"; // rest viene de exercises/{id}.rest
         }
-        String[] cols = {"Set", "Reps", "Tiempo"};
         view.tableSets.setModel(new javax.swing.table.DefaultTableModel(data, cols));
     }
 
@@ -84,7 +85,11 @@ public class ExerciseController {
                 view.setButtonState("Pausar", Color.RED);
                 break;
             case "Siguiente ejercicio":
-                finishExercise();
+                try {
+                    onExerciseFinished();
+                } finally {
+                    view.dispose();
+                }
                 break;
         }
     }
@@ -96,25 +101,54 @@ public class ExerciseController {
             public void onTick(int segundos) {
                 view.lblExerciseTimer.setText("Tiempo Ejercicio: " + formatTime(segundos));
             }
-
             @Override
             public void onFinish() {}
         });
         cronometroEjercicio.start();
 
-        // Iniciar el primer set
+        // Iniciar la secuencia: siempre pausa previa antes del primer set
         currentSetIndex = 0;
-        startNextSet();
+        startPausaAntesDeSet();
     }
 
-    private void startNextSet() {
-        if (currentSetIndex >= exercise.getSets().size()) {
+    // Siempre se llama a startPausaAntesDeSet antes de arrancar actuallyStartSet
+    private void startPausaAntesDeSet() {
+        // Si no hay sets o ya se han terminado, finalizar ejercicio
+        if (exercise.getSets() == null || currentSetIndex >= exercise.getSets().size()) {
+            finishExercise();
+            return;
+        }
+
+        // Limpiar temporizadores de UI relevantes
+        view.lblRestTimer.setText("Descanso: --:--");
+
+        // Pausa previa antes de arrancar el set actual con mensaje "Preparados..."
+        cronometroPausaSerie = new Cronometro(pausaSerieSegundos, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
+            @Override
+            public void onTick(int segundos) {
+                view.lblSetTimer.setText("Preparados... " + formatTime(segundos));
+            }
+
+            @Override
+            public void onFinish() {
+                actuallyStartSet();
+            }
+        });
+        cronometroPausaSerie.start();
+    }
+
+    // Inicia realmente el set apuntado por currentSetIndex
+    private void actuallyStartSet() {
+        // Protección por si se llegó al final durante la pausa
+        if (exercise.getSets() == null || currentSetIndex >= exercise.getSets().size()) {
             finishExercise();
             return;
         }
 
         Set set = exercise.getSets().get(currentSetIndex);
-        cronometroSet = new Cronometro(set.getTime(), Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
+        int tiempoSet = Math.max(1, set.getTime());
+
+        cronometroSet = new Cronometro(tiempoSet, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
             @Override
             public void onTick(int segundos) {
                 view.lblSetTimer.setText("Set: " + formatTime(segundos));
@@ -129,7 +163,8 @@ public class ExerciseController {
     }
 
     private void startDescanso() {
-        cronometroDescanso = new Cronometro(descansoSegundos, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
+        int descanso = ejercicioRest();
+        cronometroDescanso = new Cronometro(descanso, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
             @Override
             public void onTick(int segundos) {
                 view.lblRestTimer.setText("Descanso: " + formatTime(segundos));
@@ -137,27 +172,16 @@ public class ExerciseController {
 
             @Override
             public void onFinish() {
-                startPausaSerie();
+                
+                currentSetIndex++;
+                startPausaAntesDeSet();
             }
         });
         cronometroDescanso.start();
     }
 
-    private void startPausaSerie() {
-        // Opcional: pausa corta entre series
-        cronometroPausaSerie = new Cronometro(pausaSerieSegundos, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
-            @Override
-            public void onTick(int segundos) {
-                view.lblSetTimer.setText("Pausa serie: " + formatTime(segundos));
-            }
-
-            @Override
-            public void onFinish() {
-                currentSetIndex++;
-                startNextSet();
-            }
-        });
-        cronometroPausaSerie.start();
+    private int ejercicioRest() {
+        return exercise.getRest();
     }
 
     private void pauseCronometros() {
@@ -211,6 +235,9 @@ public class ExerciseController {
                         "\nTiempo total: " + formatTime(tiempoTotal),
                 "Resumen", JOptionPane.INFORMATION_MESSAGE);
         view.dispose();
+    }
+
+    public void onExerciseFinished() {
     }
 
     private String formatTime(int seconds) {

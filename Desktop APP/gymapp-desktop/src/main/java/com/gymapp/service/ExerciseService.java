@@ -1,11 +1,11 @@
 package com.gymapp.service;
 
+import com.gymapp.model.Exercise;
+import com.google.cloud.firestore.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
-import com.google.cloud.firestore.*;
-import com.gymapp.model.Exercise;
 
 public class ExerciseService {
 

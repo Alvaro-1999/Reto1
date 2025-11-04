@@ -12,15 +12,16 @@ import javax.swing.*;
 public class MainController {
     private final MainView view;
     private final User loggedUser;
+    private HistoricoController historicoController;
+    private HistoricoView historicoView;
+
 
     public MainController(MainView view, User loggedUser) {
         this.view = view;
         this.loggedUser = loggedUser;
 
-        // Mostrar saludo en la vista principal
         this.view.lblWelcome.setText("Bienvenido, " + loggedUser.getName() + " (Nivel " + loggedUser.getLevel() + ")");
 
-        // Eventos
         this.view.btnWorkouts.addActionListener(e -> openWorkouts());
         this.view.btnHistory.addActionListener(e -> openHistorico());
         this.view.btnExit.addActionListener(e -> exitApp());
@@ -29,9 +30,16 @@ public class MainController {
     private void openWorkouts() {
         try {
             WorkoutService workoutService = new WorkoutService();
+            HistoricoService historicoService = new HistoricoService();
+
             WorkoutView workoutView = new WorkoutView();
-            new WorkoutController(workoutService, workoutView, loggedUser);
+            historicoView = new HistoricoView(); 
+            historicoController = new HistoricoController(historicoService, historicoView, loggedUser); // guardar controlador
+
+            new WorkoutController(workoutService, workoutView, loggedUser, historicoController);
+
             workoutView.setVisible(true);
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view,
                     "Error abriendo workouts: " + ex.getMessage(),
@@ -39,18 +47,27 @@ public class MainController {
         }
     }
 
+
+
     private void openHistorico() {
         try {
-            HistoricoService historicoService = new HistoricoService();
-            HistoricoView historicoView = new HistoricoView();
-            new HistoricoController(historicoService, historicoView, loggedUser);
-            historicoView.setVisible(true);
+            if (historicoController == null || historicoView == null) {
+                HistoricoService historicoService = new HistoricoService();
+                historicoView = new HistoricoView();
+                historicoController = new HistoricoController(historicoService, historicoView, loggedUser);
+            } else {
+                historicoController.loadHistorico();
+            }
+
+            historicoView.setVisible(true); 
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view,
                     "Error abriendo histórico: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void exitApp() {
         int confirm = JOptionPane.showConfirmDialog(view,

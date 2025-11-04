@@ -15,7 +15,7 @@ public class UserResource {
     }
 
     public void save(User user) throws Exception {
-        // Guarda el objeto completo, respetando los tipos definidos en User.java
+        // Guarda el objeto completo, usando el login como ID del documento
         db.collection("users")
           .document(user.getLogin())
           .set(user)
@@ -30,7 +30,7 @@ public class UserResource {
         if (doc.exists()) {
             User found = doc.toObject(User.class);
             if (found != null) {
-                found.setLogin(doc.getId()); // Asegura que el login coincide con el ID del documento
+                found.setId(doc.getId()); // 👈 ahora guardamos el documentId en el campo id
             }
             return found;
         }
@@ -43,7 +43,7 @@ public class UserResource {
         for (QueryDocumentSnapshot doc : future.get().getDocuments()) {
             User user = doc.toObject(User.class);
             if (user != null) {
-                user.setLogin(doc.getId());
+                user.setId(doc.getId()); // 👈 asignamos el documentId al campo id
                 users.add(user);
             }
         }

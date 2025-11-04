@@ -23,23 +23,25 @@ public class HistoricoController {
         this.view.btnClose.addActionListener(e -> view.dispose());
     }
 
-    private void loadHistorico() {
+    public void loadHistorico() {
         try {
             List<Historico> historicoList = historicoService.findByUser(loggedUser);
 
-            String[] columnNames = {"Workout", "Fecha", "Nivel", "Tiempo estimado", "Progreso (%)", "Tiempo total"};
+            String[] columnNames = {"Workout", "Fecha", "Nivel", "Tiempo estimado", "Progreso (%)"};
             DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
             for (Historico h : historicoList) {
+                String tiempoEstimado = formatTime(h.getEstimatedTime());
+
                 Object[] row = {
                         h.getWorkoutName(),
                         h.getDate(),
                         h.getLevel(),
-                        h.getEstimatedTime() + " min",
-                        h.getCompletionProgress() + "%",
-                        h.getTotalTime() + " min"
+                        tiempoEstimado,
+                        h.getCompletionProgress() + "%"
                 };
-                model.addRow(row);
+                // 👇 en vez de addRow(row), insertamos siempre en la primera posición
+                model.insertRow(0, row);
             }
 
             view.tableHistorico.setModel(model);
@@ -49,5 +51,12 @@ public class HistoricoController {
                     "Error cargando histórico: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+
+    private String formatTime(int seconds) {
+        int min = seconds / 60;
+        int sec = seconds % 60;
+        return String.format("%02d:%02d", min, sec);
     }
 }

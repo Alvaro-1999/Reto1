@@ -45,12 +45,10 @@ public class UserService implements ServiceInterface<User> {
     }
 
     public boolean checkCredentials(User user) throws Exception {
-        if (isUserPresent(user)) {
-            User existingUser = find(user);
-            return existingUser.getLogin().equalsIgnoreCase(user.getLogin())
-                && existingUser.getPassword().equals(user.getPassword());
-        }
-        return false;
+        User existingUser = find(user);
+        return existingUser != null
+            && existingUser.getLogin().equalsIgnoreCase(user.getLogin())
+            && existingUser.getPassword().equals(user.getPassword());
     }
 
     public User createUser(String name, String lastName, String login, String mail, String password, String birthDate) {
@@ -61,7 +59,7 @@ public class UserService implements ServiceInterface<User> {
         newUser.setMail(mail);
         newUser.setPassword(password);
         newUser.setBirthDate(birthDate);
-        newUser.setLevel(1);
+        newUser.setLevel(0); 
         return newUser;
     }
 }

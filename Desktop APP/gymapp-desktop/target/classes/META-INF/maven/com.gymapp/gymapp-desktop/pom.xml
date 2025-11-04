@@ -1,26 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.gymapp</groupId>
   <artifactId>gymapp-desktop</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>RetoGym</name>
-
   <dependencies>
     <!-- Firebase Admin SDK -->
     <dependency>
         <groupId>com.google.firebase</groupId>
         <artifactId>firebase-admin</artifactId>
         <version>9.2.0</version>
-    </dependency>
-
-    <!-- Google Cloud Firestore explícito -->
-    <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>google-cloud-firestore</artifactId>
-        <version>3.17.0</version>
     </dependency>
 
     <!-- JSON (para backups y parsing) -->
@@ -36,12 +25,14 @@
         <artifactId>jaxb-api</artifactId>
         <version>2.3.1</version>
     </dependency>
-
-    <!-- SLF4J -->
+    
     <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>2.0.9</version>
-    </dependency>
-  </dependencies>
+	  <groupId>org.slf4j</groupId>
+	  <artifactId>slf4j-simple</artifactId>
+	  <version>2.0.9</version>
+	</dependency>
+
+</dependencies>
+
+
 </project>
