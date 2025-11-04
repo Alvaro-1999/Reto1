@@ -1,5 +1,5 @@
 package com.gymapp.controller;
-//o
+
 import com.gymapp.model.User;
 import com.gymapp.model.Workout;
 import com.gymapp.model.Exercise;
@@ -133,13 +133,12 @@ public class WorkoutController {
 
     private void launchExercise(Exercise exercise) {
         try {
-            // 🔑 Recargar sets del ejercicio antes de abrir la vista
             List<Set> sets = setService.findByExercise(db.collection("exercises").document(exercise.getId()));
             exercise.setSets(sets);
 
             ExerciseView exerciseView = new ExerciseView();
 
-            ExerciseController ec = new ExerciseController(
+            new ExerciseController(
                     exerciseView,
                     exercise,
                     historicoId,
@@ -202,7 +201,6 @@ public class WorkoutController {
         }
     }
 
-
     private int calcularTiempoEstimado(List<Exercise> ejercicios) {
         final int pausaAntesDeSet = 5;
         int totalSegundos = 0;
@@ -212,9 +210,9 @@ public class WorkoutController {
             if (sets == null || sets.isEmpty()) continue;
 
             for (Set set : sets) {
-                totalSegundos += pausaAntesDeSet;       // preparación antes del set
-                totalSegundos += set.getTime();         // duración del set
-                totalSegundos += ejercicio.getRest();   // descanso después del set
+                totalSegundos += pausaAntesDeSet;
+                totalSegundos += set.getTime();
+                totalSegundos += ejercicio.getRest();
             }
         }
 
