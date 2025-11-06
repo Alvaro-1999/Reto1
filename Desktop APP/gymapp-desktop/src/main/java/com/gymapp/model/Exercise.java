@@ -15,7 +15,6 @@ public class Exercise implements Serializable {
     private int rest;
     private DocumentReference workoutId;
 
-    // Campo temporal para ejecución
     private List<Set> sets;
 
     public Exercise() {}

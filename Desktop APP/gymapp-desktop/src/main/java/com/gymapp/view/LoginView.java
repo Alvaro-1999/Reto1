@@ -3,11 +3,7 @@ package com.gymapp.view;
 import javax.swing.*;
 
 public class LoginView extends JFrame {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public JTextField txtLogin;
+    public JTextField txtLogin;
     public JPasswordField txtPassword;
     public JButton btnLogin;
     public JButton btnRegister;

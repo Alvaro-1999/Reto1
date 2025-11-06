@@ -21,9 +21,7 @@ public class ExerciseController {
     private final User loggedUser;
 
     private int currentSetIndex = 0;
-
-    private final int descansoSegundos = 10;      // Descanso entre sets
-    private final int pausaSerieSegundos = 5;     // Mini-pausa opcional entre series
+    private final int pausaSerieSegundos = 5;
 
     private Cronometro cronometroEjercicio;
     private Cronometro cronometroSet;
@@ -57,14 +55,15 @@ public class ExerciseController {
             exercise.setSets(sets);
         }
 
-        Object[][] data = new Object[sets.size()][3];
+        String[] cols = {"Set", "Reps", "Tiempo", "Descanso"};
+        Object[][] data = new Object[sets.size()][cols.length];
         for (int i = 0; i < sets.size(); i++) {
             Set s = sets.get(i);
             data[i][0] = s.getName();
             data[i][1] = s.getReps();
             data[i][2] = s.getTime() + " seg";
+            data[i][3] = exercise.getRest() + " seg";
         }
-        String[] cols = {"Set", "Reps", "Tiempo"};
         view.tableSets.setModel(new javax.swing.table.DefaultTableModel(data, cols));
     }
 
@@ -84,37 +83,62 @@ public class ExerciseController {
                 view.setButtonState("Pausar", Color.RED);
                 break;
             case "Siguiente ejercicio":
-                finishExercise();
+                try {
+                    onExerciseFinished();
+                } finally {
+                    view.dispose();
+                }
                 break;
         }
     }
 
     private void startCronometros() {
-        // Cronómetro total del ejercicio (ascendente)
         cronometroEjercicio = new Cronometro(0, Cronometro.Tipo.ASCENDENTE, new Cronometro.CronometroListener() {
             @Override
             public void onTick(int segundos) {
                 view.lblExerciseTimer.setText("Tiempo Ejercicio: " + formatTime(segundos));
             }
-
             @Override
             public void onFinish() {}
         });
         cronometroEjercicio.start();
 
-        // Iniciar el primer set
         currentSetIndex = 0;
-        startNextSet();
+        startPausaAntesDeSet();
     }
 
-    private void startNextSet() {
-        if (currentSetIndex >= exercise.getSets().size()) {
+    private void startPausaAntesDeSet() {
+        if (exercise.getSets() == null || currentSetIndex >= exercise.getSets().size()) {
+            finishExercise();
+            return;
+        }
+
+        view.lblRestTimer.setText("Descanso: --:--");
+
+        cronometroPausaSerie = new Cronometro(pausaSerieSegundos, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
+            @Override
+            public void onTick(int segundos) {
+                view.lblSetTimer.setText("Preparados... " + formatTime(segundos));
+            }
+
+            @Override
+            public void onFinish() {
+                actuallyStartSet();
+            }
+        });
+        cronometroPausaSerie.start();
+    }
+
+    private void actuallyStartSet() {
+        if (exercise.getSets() == null || currentSetIndex >= exercise.getSets().size()) {
             finishExercise();
             return;
         }
 
         Set set = exercise.getSets().get(currentSetIndex);
-        cronometroSet = new Cronometro(set.getTime(), Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
+        int tiempoSet = Math.max(1, set.getTime());
+
+        cronometroSet = new Cronometro(tiempoSet, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
             @Override
             public void onTick(int segundos) {
                 view.lblSetTimer.setText("Set: " + formatTime(segundos));
@@ -129,7 +153,8 @@ public class ExerciseController {
     }
 
     private void startDescanso() {
-        cronometroDescanso = new Cronometro(descansoSegundos, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
+        int descanso = exercise.getRest();
+        cronometroDescanso = new Cronometro(descanso, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
             @Override
             public void onTick(int segundos) {
                 view.lblRestTimer.setText("Descanso: " + formatTime(segundos));
@@ -137,27 +162,11 @@ public class ExerciseController {
 
             @Override
             public void onFinish() {
-                startPausaSerie();
+                currentSetIndex++;
+                startPausaAntesDeSet();
             }
         });
         cronometroDescanso.start();
-    }
-
-    private void startPausaSerie() {
-        // Opcional: pausa corta entre series
-        cronometroPausaSerie = new Cronometro(pausaSerieSegundos, Cronometro.Tipo.DESCENDENTE, new Cronometro.CronometroListener() {
-            @Override
-            public void onTick(int segundos) {
-                view.lblSetTimer.setText("Pausa serie: " + formatTime(segundos));
-            }
-
-            @Override
-            public void onFinish() {
-                currentSetIndex++;
-                startNextSet();
-            }
-        });
-        cronometroPausaSerie.start();
     }
 
     private void pauseCronometros() {
@@ -175,21 +184,8 @@ public class ExerciseController {
     }
 
     private void finishExercise() {
-        if (cronometroEjercicio != null) cronometroEjercicio.stop();
-        if (cronometroSet != null) cronometroSet.stop();
-        if (cronometroDescanso != null) cronometroDescanso.stop();
-        if (cronometroPausaSerie != null) cronometroPausaSerie.stop();
-
+        stopAllCronometros();
         view.setButtonState("Siguiente ejercicio", Color.BLUE);
-
-        try {
-            if (historicoId != null && historicoService != null) {
-                int tiempoTotal = (cronometroEjercicio != null) ? cronometroEjercicio.getSegundos() : 0;
-                historicoService.updateCompletion(historicoId, 100, tiempoTotal);
-            }
-        } catch (Exception ex) {
-            System.err.println("Error actualizando histórico: " + ex.getMessage());
-        }
 
         int tiempoTotal = (cronometroEjercicio != null) ? cronometroEjercicio.getSegundos() : 0;
         JOptionPane.showMessageDialog(view,
@@ -199,18 +195,18 @@ public class ExerciseController {
     }
 
     private void exitExercise() {
+        stopAllCronometros();
+        view.dispose();
+    }
+
+    private void stopAllCronometros() {
         if (cronometroEjercicio != null) cronometroEjercicio.stop();
         if (cronometroSet != null) cronometroSet.stop();
         if (cronometroDescanso != null) cronometroDescanso.stop();
         if (cronometroPausaSerie != null) cronometroPausaSerie.stop();
+    }
 
-        int tiempoTotal = (cronometroEjercicio != null) ? cronometroEjercicio.getSegundos() : 0;
-        JOptionPane.showMessageDialog(view,
-                "Resumen del workout:\n" +
-                        "Ejercicio: " + exercise.getName() +
-                        "\nTiempo total: " + formatTime(tiempoTotal),
-                "Resumen", JOptionPane.INFORMATION_MESSAGE);
-        view.dispose();
+    public void onExerciseFinished() {
     }
 
     private String formatTime(int seconds) {

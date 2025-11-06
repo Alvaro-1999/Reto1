@@ -55,7 +55,6 @@ public class LoginController {
     }
 
     private void register() {
-        // En lugar de crear un usuario “dummy”, abrimos la ventana de registro
         RegisterView registerView = new RegisterView();
         new RegisterController(userService, registerView);
         registerView.setVisible(true);

@@ -3,11 +3,7 @@ package com.gymapp.view;
 import javax.swing.*;
 
 public class RegisterView extends JFrame {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public JTextField txtName, txtSurname, txtEmail, txtLogin, txtBirthdate;
+    public JTextField txtName, txtSurname, txtEmail, txtLogin, txtBirthdate;
     public JPasswordField txtPassword, txtPasswordRepeat;
     public JButton btnRegister, btnCancel;
 

@@ -11,6 +11,7 @@ public class Cronometro implements Runnable {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private Thread hilo;
     private final CronometroListener listener;
+    private final Object lock = new Object();
 
     public interface CronometroListener {
         void onTick(int segundos);
@@ -39,8 +40,8 @@ public class Cronometro implements Runnable {
 
     public void resume() {
         running.set(true);
-        synchronized (hilo) {
-            hilo.notify();
+        synchronized (lock) {
+            lock.notify();
         }
     }
 
@@ -48,6 +49,7 @@ public class Cronometro implements Runnable {
         running.set(false);
         if (hilo != null) {
             hilo.interrupt();
+            hilo = null;
         }
     }
 
@@ -58,28 +60,32 @@ public class Cronometro implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                synchronized (hilo) {
+        try {
+            while (true) {
+                synchronized (lock) {
                     while (!running.get()) {
-                        hilo.wait();
+                        lock.wait();
                     }
                 }
+
                 SwingUtilities.invokeLater(() -> listener.onTick(segundos));
+
+                if (tipo == Tipo.DESCENDENTE) {
+                    if (segundos <= 0) {
+                        SwingUtilities.invokeLater(listener::onFinish);
+                        break;
+                    }
+                }
+
+                Thread.sleep(1000);
 
                 if (tipo == Tipo.ASCENDENTE) {
                     segundos++;
                 } else {
                     segundos--;
-                    if (segundos < 0) {
-                        SwingUtilities.invokeLater(listener::onFinish);
-                        break;
-                    }
                 }
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                break;
             }
+        } catch (InterruptedException e) {
         }
     }
 

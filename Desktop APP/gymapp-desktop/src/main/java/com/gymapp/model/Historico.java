@@ -8,6 +8,7 @@ public class Historico implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private String id;
     private String workoutName;
     private int level;
     private int estimatedTime;
@@ -18,6 +19,9 @@ public class Historico implements Serializable {
     private DocumentReference workoutId;
 
     public Historico() {}
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getWorkoutName() { return workoutName; }
     public void setWorkoutName(String workoutName) { this.workoutName = workoutName; }
@@ -45,7 +49,7 @@ public class Historico implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(workoutName, level, estimatedTime, totalTime, completionProgress, date, userId, workoutId);
+        return Objects.hash(id, workoutName, level, estimatedTime, totalTime, completionProgress, date, userId, workoutId);
     }
 
     @Override
@@ -53,7 +57,8 @@ public class Historico implements Serializable {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Historico other = (Historico) obj;
-        return Objects.equals(workoutName, other.workoutName)
+        return Objects.equals(id, other.id)
+            && Objects.equals(workoutName, other.workoutName)
             && level == other.level
             && estimatedTime == other.estimatedTime
             && totalTime == other.totalTime
@@ -65,7 +70,7 @@ public class Historico implements Serializable {
 
     @Override
     public String toString() {
-        return "Historico [workoutName=" + workoutName + ", level=" + level + ", estimatedTime=" + estimatedTime
+        return "Historico [id=" + id + ", workoutName=" + workoutName + ", level=" + level + ", estimatedTime=" + estimatedTime
             + ", totalTime=" + totalTime + ", completionProgress=" + completionProgress + ", date=" + date
             + ", userId=" + userId + ", workoutId=" + workoutId + "]";
     }

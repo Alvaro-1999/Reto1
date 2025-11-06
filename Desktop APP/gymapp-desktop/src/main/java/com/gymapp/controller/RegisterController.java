@@ -28,7 +28,6 @@ public class RegisterController {
             String passwordRepeat = new String(view.txtPasswordRepeat.getPassword()).trim();
             String birthdate = view.txtBirthdate.getText().trim();
 
-            // Validaciones
             if (name.isEmpty() || surname.isEmpty() || email.isEmpty() ||
                 login.isEmpty() || password.isEmpty() || birthdate.isEmpty()) {
                 JOptionPane.showMessageDialog(view, "Todos los campos son obligatorios");
@@ -45,7 +44,6 @@ public class RegisterController {
                 return;
             }
 
-            // Comprobar si ya existe login
             User temp = new User();
             temp.setLogin(login);
             if (userService.isUserPresent(temp)) {
@@ -53,7 +51,6 @@ public class RegisterController {
                 return;
             }
 
-            // Crear usuario
             User newUser = userService.createUser(name, surname, login, email, password, birthdate);
             userService.save(newUser);
 

@@ -6,21 +6,17 @@ import java.awt.*;
 public class ExerciseView extends JFrame {
     private static final long serialVersionUID = 1L;
 
-    // Labels principales
-    public JLabel lblWorkoutTimer;
     public JLabel lblWorkoutName;
+
     public JLabel lblExerciseName;
     public JLabel lblExerciseDesc;
 
-    // Cronómetros
     public JLabel lblExerciseTimer;
     public JLabel lblSetTimer;
     public JLabel lblRestTimer;
 
-    // Tabla de sets
     public JTable tableSets;
 
-    // Botones
     public JButton btnAction;
     public JButton btnExit;
 
@@ -30,19 +26,15 @@ public class ExerciseView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Panel superior (información del workout y ejercicio)
-        JPanel topPanel = new JPanel(new GridLayout(4, 1));
-        lblWorkoutTimer = new JLabel("Cronómetro Workout: 00:00", SwingConstants.CENTER);
+        JPanel topPanel = new JPanel(new GridLayout(3, 1));
         lblWorkoutName = new JLabel("Workout: ---", SwingConstants.CENTER);
         lblExerciseName = new JLabel("Ejercicio: ---", SwingConstants.CENTER);
         lblExerciseDesc = new JLabel("Descripción: ---", SwingConstants.CENTER);
 
-        topPanel.add(lblWorkoutTimer);
         topPanel.add(lblWorkoutName);
         topPanel.add(lblExerciseName);
         topPanel.add(lblExerciseDesc);
 
-        // Panel lateral (cronómetros: ejercicio, set y descanso)
         JPanel sidePanel = new JPanel(new GridLayout(3, 1, 5, 5));
         lblExerciseTimer = new JLabel("Tiempo Ejercicio: 00:00", SwingConstants.CENTER);
         lblSetTimer = new JLabel("Set: 00:00", SwingConstants.CENTER);
@@ -52,21 +44,20 @@ public class ExerciseView extends JFrame {
         sidePanel.add(lblSetTimer);
         sidePanel.add(lblRestTimer);
 
-        // Tabla de sets
-        String[] cols = {"Set", "Reps", "Tiempo"};
+        String[] cols = {"Set", "Reps", "Tiempo", "Descanso"};
         tableSets = new JTable(new Object[0][cols.length], cols);
         JScrollPane scrollSets = new JScrollPane(tableSets);
 
-        // Panel inferior (botones)
         JPanel bottomPanel = new JPanel(new FlowLayout());
         btnAction = new JButton("Iniciar");
         btnAction.setBackground(Color.GREEN);
+        btnAction.setForeground(Color.WHITE);
         btnExit = new JButton("Salir");
         btnExit.setBackground(Color.RED);
+        btnExit.setForeground(Color.WHITE);
         bottomPanel.add(btnAction);
         bottomPanel.add(btnExit);
 
-        // Layout principal
         setLayout(new BorderLayout(10, 10));
         add(topPanel, BorderLayout.NORTH);
         add(sidePanel, BorderLayout.WEST);
@@ -74,9 +65,9 @@ public class ExerciseView extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    // Método auxiliar para cambiar estado del botón principal
     public void setButtonState(String text, Color color) {
         btnAction.setText(text);
         btnAction.setBackground(color);
+        btnAction.setForeground(Color.WHITE);
     }
 }

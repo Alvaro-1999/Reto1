@@ -2,10 +2,11 @@ package com.gymapp.controller;
 
 import com.gymapp.model.User;
 import com.gymapp.model.Workout;
-import com.gymapp.model.Set;
 import com.gymapp.model.Exercise;
+import com.gymapp.model.Set;
 import com.gymapp.service.WorkoutService;
 import com.gymapp.service.HistoricoService;
+import com.gymapp.service.SetService;
 import com.gymapp.view.WorkoutView;
 import com.gymapp.view.ExerciseView;
 import com.google.cloud.firestore.DocumentReference;
@@ -13,24 +14,34 @@ import com.google.cloud.firestore.Firestore;
 
 import javax.swing.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class WorkoutController {
 
     private final WorkoutService workoutService;
     private final HistoricoService historicoService;
+    private final SetService setService;
     private final WorkoutView view;
     private final User loggedUser;
     private final Firestore db;
+    private final HistoricoController historicoController;
 
-    public WorkoutController(WorkoutService workoutService, WorkoutView view, User loggedUser) {
+    private List<Exercise> currentExercises;
+    private int currentExerciseIndex = 0;
+    private Workout selectedWorkout;
+    private long workoutStartMillis;
+    private String historicoId;
+
+    public WorkoutController(WorkoutService workoutService, WorkoutView view, User loggedUser, HistoricoController historicoController) {
         this.workoutService = workoutService;
         this.historicoService = new HistoricoService();
         this.view = view;
         this.loggedUser = loggedUser;
         this.db = workoutService.getDB();
+        this.setService = new SetService(db);
+        this.historicoController = historicoController;
 
         loadWorkouts();
         setupListeners();
@@ -53,24 +64,22 @@ public class WorkoutController {
     }
 
     private void setupListeners() {
-        // Mostrar ejercicios al seleccionar un workout
         this.view.listWorkouts.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int index = view.listWorkouts.getSelectedIndex();
                 if (index >= 0) {
-                    Workout selected = view.getWorkouts().get(index);
+                    selectedWorkout = view.getWorkouts().get(index);
                     try {
-                        List<Exercise> exercises = workoutService.getExercisesFromWorkout(selected);
-
-                        List<String[]> rows = new ArrayList<>();
+                        List<Exercise> exercises = workoutService.getExercisesFromWorkout(selectedWorkout);
                         for (Exercise ex : exercises) {
-                            rows.add(new String[]{
-                                ex.getName(),
-                                ex.getDescription(),
-                                ex.getRest() + " seg"
-                            });
+                            List<Set> sets = setService.findByExercise(db.collection("exercises").document(ex.getId()));
+                            ex.setSets(sets);
                         }
+                        currentExercises = exercises;
 
+                        List<String[]> rows = exercises.stream()
+                                .map(ex -> new String[]{ex.getName(), ex.getDescription(), ex.getRest() + " seg"})
+                                .collect(Collectors.toList());
                         view.updateExerciseTable(rows);
 
                     } catch (Exception ex) {
@@ -82,51 +91,137 @@ public class WorkoutController {
             }
         });
 
-        // Abrir pantalla de ejecución
-        this.view.btnShowSets.addActionListener(e -> openExerciseScreen());
+        this.view.btnShowSets.addActionListener(e -> startWorkoutExecution());
     }
 
-    private void openExerciseScreen() {
-        int index = view.listWorkouts.getSelectedIndex();
-        if (index >= 0) {
-            Workout selected = view.getWorkouts().get(index);
-            try {
-                // Cargar todos los sets de todos los ejercicios del workout
-                List<Set> sets = workoutService.getSetsFromWorkout(selected);
+    private void startWorkoutExecution() {
+        if (selectedWorkout == null || currentExercises == null || currentExercises.isEmpty()) {
+            JOptionPane.showMessageDialog(view, "Selecciona primero un workout con ejercicios.", "Atención", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-                // Crear histórico
-                String today = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-                DocumentReference workoutRef = db.collection("workouts").document(selected.getId());
+        try {
+            currentExerciseIndex = 0;
+            workoutStartMillis = System.currentTimeMillis();
 
-                DocumentReference historicoRef = historicoService.save(
-                        loggedUser,
-                        selected.getWorkoutName(),
-                        today,
-                        selected.getTiempo(),
-                        0,
-                        0,
-                        selected.getLevel(),
-                        workoutRef
-                );
+            String today = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+            DocumentReference workoutRef = db.collection("workouts").document(selectedWorkout.getId());
 
-                // Crear Exercise genérico para ejecutar todos los sets
-                Exercise exercise = new Exercise();
-                exercise.setName(selected.getWorkoutName());
-                exercise.setDescription("Ejercicios del workout " + selected.getWorkoutName());
-                exercise.setRest(10); // puedes ajustar el descanso general
-                exercise.setSets(sets != null ? sets : new ArrayList<>());
-                exercise.setWorkoutId(workoutRef);
+            int tiempoEstimado = calcularTiempoEstimado(currentExercises);
 
-                // Abrir vista de ejecución
-                ExerciseView exerciseView = new ExerciseView();
-                new ExerciseController(exerciseView, exercise, historicoRef.getId(), historicoService, loggedUser);
-                exerciseView.setVisible(true);
+            DocumentReference historicoRef = historicoService.save(
+                    loggedUser,
+                    selectedWorkout.getWorkoutName(),
+                    today,
+                    tiempoEstimado,
+                    0,
+                    0,
+                    selectedWorkout.getLevel(),
+                    workoutRef
+            );
 
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(view,
-                        "Error cargando sets: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+            historicoId = historicoRef.getId();
+
+            launchExercise(currentExercises.get(currentExerciseIndex));
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view,
+                    "Error iniciando workout: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void launchExercise(Exercise exercise) {
+        try {
+            List<Set> sets = setService.findByExercise(db.collection("exercises").document(exercise.getId()));
+            exercise.setSets(sets);
+
+            ExerciseView exerciseView = new ExerciseView();
+
+            new ExerciseController(
+                    exerciseView,
+                    exercise,
+                    historicoId,
+                    historicoService,
+                    loggedUser
+            ) {
+                @Override
+                public void onExerciseFinished() {
+                    currentExerciseIndex++;
+
+                    int ejerciciosRealizados = currentExerciseIndex;
+                    int totalEjercicios = currentExercises.size();
+                    int progreso = (int) (((double) ejerciciosRealizados / totalEjercicios) * 100);
+                    int tiempoTranscurrido = (int) ((System.currentTimeMillis() - workoutStartMillis) / 1000);
+
+                    try {
+                        historicoService.updateCompletion(historicoId, progreso, tiempoTranscurrido);
+                    } catch (Exception ex) {
+                        System.err.println("Error actualizando progreso: " + ex.getMessage());
+                    }
+
+                    if (currentExerciseIndex < totalEjercicios) {
+                        SwingUtilities.invokeLater(() -> launchExercise(currentExercises.get(currentExerciseIndex)));
+                    } else {
+                        JOptionPane.showMessageDialog(view,
+                                "¡Workout completado!\n" +
+                                        "Tiempo total: " + formatTime(tiempoTranscurrido) + "\n" +
+                                        "Ejercicios completados: " + ejerciciosRealizados + " de " + totalEjercicios + " (" + progreso + "%)\n" +
+                                        "¡Gran trabajo, sigue así!",
+                                "Resumen Workout", JOptionPane.INFORMATION_MESSAGE);
+
+                        if (selectedWorkout.getLevel() == loggedUser.getLevel()) {
+                            int nuevoNivel = loggedUser.getLevel() + 1;
+                            loggedUser.setLevel(nuevoNivel);
+                            try {
+                                db.collection("users").document(loggedUser.getId())
+                                        .update("level", nuevoNivel);
+                                JOptionPane.showMessageDialog(view,
+                                        "¡Felicidades! Has desbloqueado el nivel " + nuevoNivel,
+                                        "Nivel desbloqueado", JOptionPane.INFORMATION_MESSAGE);
+                            } catch (Exception ex) {
+                                System.err.println("Error actualizando nivel de usuario: " + ex.getMessage());
+                            }
+                            loadWorkouts();
+                        }
+
+                        if (historicoController != null) {
+                            historicoController.loadHistorico();
+                        }
+                    }
+                }
+            };
+
+            exerciseView.setVisible(true);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view,
+                    "Error lanzando ejercicio: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private int calcularTiempoEstimado(List<Exercise> ejercicios) {
+        final int pausaAntesDeSet = 5;
+        int totalSegundos = 0;
+
+        for (Exercise ejercicio : ejercicios) {
+            List<Set> sets = ejercicio.getSets();
+            if (sets == null || sets.isEmpty()) continue;
+
+            for (Set set : sets) {
+                totalSegundos += pausaAntesDeSet;
+                totalSegundos += set.getTime();
+                totalSegundos += ejercicio.getRest();
             }
         }
+
+        return totalSegundos;
+    }
+
+    private String formatTime(int seconds) {
+        int min = seconds / 60;
+        int sec = seconds % 60;
+        return String.format("%02d:%02d", min, sec);
     }
 }
