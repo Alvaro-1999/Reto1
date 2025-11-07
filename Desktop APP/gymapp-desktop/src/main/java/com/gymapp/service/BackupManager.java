@@ -30,23 +30,17 @@ public class BackupManager {
         sets = cargarArchivo("sets.dat", com.gymapp.model.Set.class);
         historicos = cargarArchivo("historicos.dat", Historico.class);
 
-        System.out.println("=== Resumen de carga de archivos ===");
-        System.out.println("Usuarios: " + users.size());
-        System.out.println("Workouts: " + workouts.size());
-        System.out.println("Ejercicios: " + exercises.size());
-        System.out.println("Sets: " + sets.size());
-        System.out.println("Históricos: " + historicos.size());
+       
 
-        // 🔹 Solo reconstruir referencias si hay conexión (db no es null)
+        //  Solo reconstruir referencias si hay conexión (db no es null)
         if (FirebaseConfig.getDB() != null) {
             reconstruirReferencias();
-            System.out.println("✅ Datos cargados desde backup local y referencias reconstruidas (modo online).");
+            System.out.println(" Datos cargados desde backup local y referencias reconstruidas (modo online).");
         } else {
-            System.out.println("✅ Datos cargados desde backup local (modo offline, sin reconstruir referencias).");
+            System.out.println(" Datos cargados desde backup local (modo offline, sin reconstruir referencias).");
         }
     }
 
-    // 🔹 Busca usuario por login + password en modo offline
     public User buscarUsuarioOffline(String login, String password) {
         for (User u : users) {
             if (u.getLogin().equalsIgnoreCase(login)
@@ -57,7 +51,6 @@ public class BackupManager {
         return null;
     }
 
-    // --- MÉTODOS PRIVADOS ---
 
     private <T> List<T> cargarArchivo(String fileName, Class<T> clazz)
             throws IOException, ClassNotFoundException {
@@ -87,7 +80,8 @@ public class BackupManager {
         return new ArrayList<>();
     }
 
-    // 🔹 Reconstruye las referencias (String → DocumentReference)
+    //  Reconstruye las referencias (String → DocumentReference) 
+    //que se han guardado con string por los dat no aceptan guardar referencias
     private void reconstruirReferencias() {
         Firestore db = FirebaseConfig.getDB();
 

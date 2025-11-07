@@ -51,11 +51,6 @@ public class WorkoutController {
         try {
             List<Workout> workouts = workoutService.findByLevelOrBelow(loggedUser.getLevel());
 
-            // 🖨️ Imprimir para verificar offline/online
-            System.out.println("=== Workouts cargados ===");
-            for (Workout w : workouts) {
-                System.out.println(w.getWorkoutName() + " (nivel " + w.getLevel() + ")");
-            }
 
             DefaultListModel<String> model = new DefaultListModel<>();
             for (Workout w : workouts) {
@@ -119,25 +114,27 @@ private void startWorkoutExecution() {
 
         int tiempoEstimado = calcularTiempoEstimado(currentExercises);
 
-        // 🔹 Generar un DocumentReference con ID real (aunque estemos offline)
-        DocumentReference historicoRef = db.collection("historicos").document(); // Genera ID único
-        historicoId = historicoRef.getId(); // Guardamos su ID ya mismo
+        //  Generar un DocumentReference con ID real (aunque estemos offline)
+        historicoId = db.collection("historicos").document().getId(); // ID consistente desde el inicio
+// Guardamos su ID ya mismo
 
-        System.out.println("🆔 ID de histórico generado: " + historicoId);
+        System.out.println("🆔 ID de histórico generado: " + historicoId);//ID de histórico generado
 
-        // 🔹 Intentar guardar en Firestore o en modo offline
+        //  Intentar guardar en Firestore o en modo offline
         historicoService.save(
-                loggedUser,
-                selectedWorkout.getWorkoutName(),
-                today,
-                tiempoEstimado,
-                0,
-                0,
-                selectedWorkout.getLevel(),
-                workoutRef
-        );
+        	    historicoId,
+        	    loggedUser,
+        	    selectedWorkout.getWorkoutName(),
+        	    today,
+        	    tiempoEstimado,
+        	    0,
+        	    0,
+        	    selectedWorkout.getLevel(),
+        	    workoutRef
+        	);
 
-        // 🔹 Iniciar el primer ejercicio
+
+        //  Iniciar el primer ejercicio
         launchExercise(currentExercises.get(currentExerciseIndex));
 
     } catch (Exception ex) {
@@ -176,7 +173,7 @@ private void startWorkoutExecution() {
                     try {
                         historicoService.updateCompletion(historicoId, progreso, tiempoTranscurrido);//The method updateCompletion(String, int, int) is undefined for the type HistoricoService
                     } catch (Exception ex) {
-                        System.err.println("Error actualizando progreso: " + ex.getMessage());
+                        System.err.println("Error actualizando progreso: " + ex.getMessage());//esta es la liea del error 
                     }
 
                     if (currentExerciseIndex < totalEjercicios) {

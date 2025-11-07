@@ -16,9 +16,10 @@ public class HistoricoService {
     }
 
     // Guardar histórico, online o offline
-    public DocumentReference save(User user, String workoutName, String date,
-                                  int estimatedTime, int completionProgress, int totalTime, int level,
-                                  DocumentReference workoutRef) throws Exception {
+    public DocumentReference save(String historicoId, User user, String workoutName, String date,
+            int estimatedTime, int completionProgress, int totalTime, int level,
+            DocumentReference workoutRef) throws Exception {
+
 
         Historico entry = new Historico();
         entry.setWorkoutName(workoutName);
@@ -33,9 +34,13 @@ public class HistoricoService {
             entry.setUserId(db.collection("users").document(user.getLogin()));
             entry.setWorkoutId(workoutRef);
 
-            DocumentReference historicoRef = db.collection("historicos").document();
+            entry.setUserId(db.collection("users").document(user.getLogin()));
+            entry.setWorkoutId(workoutRef);
+
+            DocumentReference historicoRef = db.collection("historicos").document(historicoId);
             historicoRef.set(entry).get();
             return historicoRef;
+
         } else {
             // Offline
             entry.setUserIdStr("users/" + user.getLogin());
@@ -47,18 +52,30 @@ public class HistoricoService {
             return null; // ID temporal
         }
     }
-
-    // Actualizar progreso
     public void updateCompletion(String historicoId, int completionProgress, int totalTime) throws Exception {
+
+        if (historicoId == null || historicoId.isEmpty()) {
+            System.err.println("⚠️ No hay ID válido para actualizar progreso.");
+            return;
+        }
+
         if (ConnectionGestor.hayConexion()) {
             db.collection("historicos").document(historicoId)
-              .update("completionProgress", completionProgress,
-                      "totalTime", totalTime)
-              .get();
+                    .update("completionProgress", completionProgress,
+                            "totalTime", totalTime)
+                    .get();
+
+            System.out.println("✅ Progreso actualizado online en histórico " + historicoId);
+
         } else {
-            OfflineDataProvider.actualizarHistoricoOffline(historicoId, completionProgress, totalTime);
+            OfflineDataProvider.actualizarHistoricoOffline(
+                    historicoId, completionProgress, totalTime
+            );
+            System.out.println("⚠️ Actualizado offline. Se sincronizará.");
         }
     }
+
+
 
     // Obtener históricos de un usuario
     public List<Historico> findByUser(User user) throws Exception {
@@ -95,9 +112,10 @@ public class HistoricoService {
             }
             User user = new User();
             user.setLogin(h.getUserIdStr().replace("users/", ""));
-            save(user, h.getWorkoutName(), h.getDate(),
-                 h.getEstimatedTime(), h.getCompletionProgress(),
-                 h.getTotalTime(), h.getLevel(), workoutRef);
+            save(h.getId(), user, h.getWorkoutName(), h.getDate(),
+            	     h.getEstimatedTime(), h.getCompletionProgress(),
+            	     h.getTotalTime(), h.getLevel(), workoutRef);
+
         }
         OfflineDataProvider.limpiarHistoricosPendientes();
     }

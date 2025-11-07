@@ -21,19 +21,19 @@ public class BackupController {
      */
     public void updateBackupFromCloud() {
         try {
-            System.out.println("🔄 Descargando datos desde Firestore...");
-            backupService.performFullBackup();
-            System.out.println("✅ Backup completo generado correctamente.");
+            System.out.println("🟦 Ejecutando proceso de backup externo...");
+            com.gymapp.backups.BackupLauncher.main(null);
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null,
-                    "Error al actualizar backup: " + e.getMessage(),
+                    "Error al ejecutar proceso de backup: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+
     /**
-     * Cargar desde archivos locales (modo offline)
+     * Cargar desde archivos   (modo offline)
      */
     public BackupData loadBackupOffline() {
         try {

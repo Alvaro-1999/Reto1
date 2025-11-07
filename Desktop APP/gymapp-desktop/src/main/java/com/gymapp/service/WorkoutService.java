@@ -46,11 +46,7 @@ public class WorkoutService {
     	if (!ConnectionGestor.hayConexion()) {
             List<Workout> offlineWorkouts = OfflineDataProvider.getWorkoutsForLevel(userLevel);
 
-            // 🔹 Imprimir cada workout en consola
-            System.out.println("=== Workouts offline encontrados ===");
-            for (Workout w : offlineWorkouts) {
-                System.out.println("Nombre: " + w.getWorkoutName() + ", Nivel: " + w.getLevel());
-            }
+        
 
             return offlineWorkouts;
         }

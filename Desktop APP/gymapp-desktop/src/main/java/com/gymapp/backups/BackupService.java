@@ -232,11 +232,11 @@ public class BackupService {
         List<Historico> historicos = (List<Historico>) readObject(BACKUP_DIR + "historicos.dat");
 
         if (historicos.isEmpty()) {
-            System.out.println("⚠️ El archivo historicos.dat está vacío o no existe.");
+            System.out.println(" El archivo historicos.dat está vacío o no existe.");
             return;
         }
 
-        System.out.println("📋 Contenido de historicos.dat:");
+        System.out.println(" Contenido de historicos.dat:");
         for (Historico h : historicos) {
             System.out.println("ID: " + h.getId());
             System.out.println("UserIdStr: " + h.getUserIdStr());

@@ -41,17 +41,13 @@ public class OfflineDataProvider {
 
     public static List<Workout> getWorkoutsForLevel(int level) {
         List<Workout> all = backupManager.getWorkouts();
-        System.out.println("=== Todos los workouts ===");
-        for (Workout w : all) {
-            System.out.println("Workout: " + w.getWorkoutName() + ", nivel: " + w.getLevel());
-        }
+   
 
         List<Workout> filtered = all.stream()
                 .filter(w -> w.getLevel() <= level)
                 .collect(Collectors.toList());
 
-        System.out.println("=== Workouts filtrados para nivel " + level + " ===");
-        System.out.println("Cantidad de workouts: " + filtered.size());
+      
 
         return filtered;
     }
@@ -77,9 +73,7 @@ public class OfflineDataProvider {
                 .collect(Collectors.toList());
     }
 
-    // ================================
-    // ==== MÉTODOS DE ESCRITURA ======
-    // ================================
+
 
     public static void guardarHistoricoOffline(Historico h) {
         historicosPendientes.add(h);
@@ -115,7 +109,6 @@ public class OfflineDataProvider {
             }
         }
 
-        // 🔹 También actualizar los datos en el backup local
         List<Historico> all = backupManager.getHistoricos();
         for (Historico h : all) {
             if (h.getId() != null && h.getId().equals(historicoId)) {
