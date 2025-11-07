@@ -1,6 +1,8 @@
 package com.gymapp.service;
 
 import com.gymapp.model.User;
+import com.gymapp.util.ConnectionGestor;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -21,11 +23,20 @@ public class UserService implements ServiceInterface<User> {
 
     @Override
     public User find(User user) throws Exception {
+        if (!ConnectionGestor.hayConexion()) {
+            return OfflineDataProvider.getUsers().stream()
+                    .filter(u -> u.getLogin().equalsIgnoreCase(user.getLogin()))
+                    .findFirst()
+                    .orElse(null);
+        }
         return userResource.find(user);
     }
 
     @Override
     public List<User> findAll() throws Exception {
+        if (!ConnectionGestor.hayConexion()) {
+            return OfflineDataProvider.getUsers();
+        }
         return userResource.findAll();
     }
 
@@ -59,7 +70,7 @@ public class UserService implements ServiceInterface<User> {
         newUser.setMail(mail);
         newUser.setPassword(password);
         newUser.setBirthDate(birthDate);
-        newUser.setLevel(0); 
+        newUser.setLevel(0);
         return newUser;
     }
 }

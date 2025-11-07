@@ -15,7 +15,6 @@ public class MainController {
     private HistoricoController historicoController;
     private HistoricoView historicoView;
 
-
     public MainController(MainView view, User loggedUser) {
         this.view = view;
         this.loggedUser = loggedUser;
@@ -34,7 +33,7 @@ public class MainController {
 
             WorkoutView workoutView = new WorkoutView();
             historicoView = new HistoricoView(); 
-            historicoController = new HistoricoController(historicoService, historicoView, loggedUser); // guardar controlador
+            historicoController = new HistoricoController(historicoService, historicoView, loggedUser);
 
             new WorkoutController(workoutService, workoutView, loggedUser, historicoController);
 
@@ -46,8 +45,6 @@ public class MainController {
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-
 
     private void openHistorico() {
         try {
@@ -67,7 +64,6 @@ public class MainController {
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
     private void exitApp() {
         int confirm = JOptionPane.showConfirmDialog(view,

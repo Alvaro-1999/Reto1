@@ -2,6 +2,7 @@ package com.gymapp.service;
 
 import com.gymapp.model.Historico;
 import com.gymapp.model.User;
+import com.gymapp.util.ConnectionGestor;
 import com.google.cloud.firestore.*;
 
 import java.util.ArrayList;
@@ -18,8 +19,6 @@ public class HistoricoService {
                                   int estimatedTime, int completionProgress, int totalTime, int level,
                                   DocumentReference workoutRef) throws Exception {
 
-        DocumentReference historicoRef = db.collection("historicos").document();
-
         Historico entry = new Historico();
         entry.setWorkoutName(workoutName);
         entry.setDate(date);
@@ -27,37 +26,73 @@ public class HistoricoService {
         entry.setCompletionProgress(completionProgress);
         entry.setTotalTime(totalTime);
         entry.setLevel(level);
-        entry.setUserId(db.collection("users").document(user.getLogin()));
-        entry.setWorkoutId(workoutRef);
 
-        historicoRef.set(entry).get();
-        return historicoRef;
+        if (ConnectionGestor.hayConexion()) {
+                        entry.setUserId(db.collection("users").document(user.getLogin()));
+            entry.setWorkoutId(workoutRef);
+
+            DocumentReference historicoRef = db.collection("historicos").document();
+            historicoRef.set(entry).get();
+            return historicoRef;
+        } else {
+                        entry.setUserIdStr("users/" + user.getLogin());
+            if (workoutRef != null) {
+                entry.setWorkoutIdStr("workouts/" + workoutRef.getId());
+            }
+            OfflineDataProvider.guardarHistoricoOffline(entry);
+            System.out.println("⚠️ Guardado offline. Se sincronizará cuando haya conexión.");
+            return null; 
+        }
     }
 
     public void updateCompletion(String historicoId, int completionProgress, int totalTime) throws Exception {
-        db.collection("historicos").document(historicoId)
-                .update("completionProgress", completionProgress,
-                        "totalTime", totalTime)
-                .get();
+        if (ConnectionGestor.hayConexion()) {
+            db.collection("historicos").document(historicoId)
+              .update("completionProgress", completionProgress,
+                      "totalTime", totalTime)
+              .get();
+        } else {
+            OfflineDataProvider.actualizarHistoricoOffline(historicoId, completionProgress, totalTime);
+        }
     }
 
     public List<Historico> findByUser(User user) throws Exception {
-        List<Historico> result = new ArrayList<>();
+        if (ConnectionGestor.hayConexion()) {
+            List<Historico> result = new ArrayList<>();
+            QuerySnapshot snapshot = db.collection("historicos")
+                    .whereEqualTo("userId", db.collection("users").document(user.getLogin()))
+                    .get().get();
 
-        QuerySnapshot snapshot = db.collection("historicos")
-                .whereEqualTo("userId", db.collection("users").document(user.getLogin()))
-                .get().get();
-
-        for (DocumentSnapshot doc : snapshot.getDocuments()) {
-            Historico h = doc.toObject(Historico.class);
-            if (h != null) {
-                h.setId(doc.getId());
-                result.add(h);
+            for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                Historico h = doc.toObject(Historico.class);
+                if (h != null) {
+                    h.setId(doc.getId());
+                    result.add(h);
+                }
             }
+
+            result.sort((a, b) -> b.getId().compareTo(a.getId()));
+            return result;
+        } else {
+            return OfflineDataProvider.getHistoricoForUser(user);
         }
+    }
 
-        result.sort((a, b) -> b.getId().compareTo(a.getId()));
+    public void sincronizarConFirestore() throws Exception {
+        if (!ConnectionGestor.hayConexion()) return;
 
-        return result;
+        List<Historico> pendientes = OfflineDataProvider.getHistoricosPendientes();
+        for (Historico h : pendientes) {
+            DocumentReference workoutRef = null;
+            if (h.getWorkoutIdStr() != null) {
+                workoutRef = db.document(h.getWorkoutIdStr());
+            }
+            User user = new User();
+            user.setLogin(h.getUserIdStr().replace("users/", ""));
+            save(user, h.getWorkoutName(), h.getDate(),
+                 h.getEstimatedTime(), h.getCompletionProgress(),
+                 h.getTotalTime(), h.getLevel(), workoutRef);
+        }
+        OfflineDataProvider.limpiarHistoricosPendientes();
     }
 }

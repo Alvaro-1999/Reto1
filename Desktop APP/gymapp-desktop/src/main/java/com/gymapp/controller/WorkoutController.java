@@ -50,6 +50,12 @@ public class WorkoutController {
     private void loadWorkouts() {
         try {
             List<Workout> workouts = workoutService.findByLevelOrBelow(loggedUser.getLevel());
+
+            System.out.println("=== Workouts cargados ===");
+            for (Workout w : workouts) {
+                System.out.println(w.getWorkoutName() + " (nivel " + w.getLevel() + ")");
+            }
+
             DefaultListModel<String> model = new DefaultListModel<>();
             for (Workout w : workouts) {
                 model.addElement(w.getWorkoutName() + " (nivel " + w.getLevel() + ")");
@@ -62,6 +68,7 @@ public class WorkoutController {
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void setupListeners() {
         this.view.listWorkouts.addListSelectionListener(e -> {
@@ -93,43 +100,51 @@ public class WorkoutController {
 
         this.view.btnShowSets.addActionListener(e -> startWorkoutExecution());
     }
-
-    private void startWorkoutExecution() {
-        if (selectedWorkout == null || currentExercises == null || currentExercises.isEmpty()) {
-            JOptionPane.showMessageDialog(view, "Selecciona primero un workout con ejercicios.", "Atención", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        try {
-            currentExerciseIndex = 0;
-            workoutStartMillis = System.currentTimeMillis();
-
-            String today = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-            DocumentReference workoutRef = db.collection("workouts").document(selectedWorkout.getId());
-
-            int tiempoEstimado = calcularTiempoEstimado(currentExercises);
-
-            DocumentReference historicoRef = historicoService.save(
-                    loggedUser,
-                    selectedWorkout.getWorkoutName(),
-                    today,
-                    tiempoEstimado,
-                    0,
-                    0,
-                    selectedWorkout.getLevel(),
-                    workoutRef
-            );
-
-            historicoId = historicoRef.getId();
-
-            launchExercise(currentExercises.get(currentExerciseIndex));
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(view,
-                    "Error iniciando workout: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
+private void startWorkoutExecution() {
+    if (selectedWorkout == null || currentExercises == null || currentExercises.isEmpty()) {
+        JOptionPane.showMessageDialog(view,
+                "Selecciona primero un workout con ejercicios.",
+                "Atención",
+                JOptionPane.WARNING_MESSAGE);
+        return;
     }
+
+    try {
+        currentExerciseIndex = 0;
+        workoutStartMillis = System.currentTimeMillis();
+
+        String today = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+        DocumentReference workoutRef = db.collection("workouts").document(selectedWorkout.getId());
+
+        int tiempoEstimado = calcularTiempoEstimado(currentExercises);
+
+        DocumentReference historicoRef = db.collection("historicos").document(); 
+        historicoId = historicoRef.getId(); 
+
+        System.out.println("🆔 ID de histórico generado: " + historicoId);
+
+        historicoService.save(
+                loggedUser,
+                selectedWorkout.getWorkoutName(),
+                today,
+                tiempoEstimado,
+                0,
+                0,
+                selectedWorkout.getLevel(),
+                workoutRef
+        );
+
+        launchExercise(currentExercises.get(currentExerciseIndex));
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(view,
+                "Error iniciando workout: " + ex.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+}
+
 
     private void launchExercise(Exercise exercise) {
         try {
@@ -155,7 +170,7 @@ public class WorkoutController {
                     int tiempoTranscurrido = (int) ((System.currentTimeMillis() - workoutStartMillis) / 1000);
 
                     try {
-                        historicoService.updateCompletion(historicoId, progreso, tiempoTranscurrido);
+                        historicoService.updateCompletion(historicoId, progreso, tiempoTranscurrido);//The method updateCompletion(String, int, int) is undefined for the type HistoricoService
                     } catch (Exception ex) {
                         System.err.println("Error actualizando progreso: " + ex.getMessage());
                     }

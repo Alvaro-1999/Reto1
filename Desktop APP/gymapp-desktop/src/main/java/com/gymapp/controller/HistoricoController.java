@@ -27,18 +27,20 @@ public class HistoricoController {
         try {
             List<Historico> historicoList = historicoService.findByUser(loggedUser);
 
-            String[] columnNames = {"Workout", "Fecha", "Nivel", "Tiempo estimado", "Progreso (%)"};
+            String[] columnNames = {"Workout", "Fecha", "Nivel", "Tiempo estimado", "Progreso (%)", "Tiempo total (s)"};
             DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
             for (Historico h : historicoList) {
                 String tiempoEstimado = formatTime(h.getEstimatedTime());
+                String tiempoTotal = String.valueOf(h.getTotalTime());
 
                 Object[] row = {
                         h.getWorkoutName(),
                         h.getDate(),
                         h.getLevel(),
                         tiempoEstimado,
-                        h.getCompletionProgress() + "%"
+                        h.getCompletionProgress() + "%",
+                        tiempoTotal
                 };
                 model.insertRow(0, row);
             }
@@ -51,7 +53,6 @@ public class HistoricoController {
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
     private String formatTime(int seconds) {
         int min = seconds / 60;

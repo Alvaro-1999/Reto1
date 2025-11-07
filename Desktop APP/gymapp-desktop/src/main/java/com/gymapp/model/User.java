@@ -16,9 +16,7 @@ public class User implements Serializable {
     private String birthDate;
     private int level;
     private String userType;
-    private boolean dark_mode;
-    private String language;
-
+   
     public User() {}
 
     public String getId() { return id; }
@@ -48,15 +46,10 @@ public class User implements Serializable {
     public String getUserType() { return userType; }
     public void setUserType(String userType) { this.userType = userType; }
 
-    public boolean isDark_mode() { return dark_mode; }
-    public void setDark_mode(boolean dark_mode) { this.dark_mode = dark_mode; }
-
-    public String getLanguage() { return language; }
-    public void setLanguage(String language) { this.language = language; }
-
+  
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, name, lastName, mail, password, birthDate, level, userType, dark_mode, language);
+        return Objects.hash(id, login, name, lastName, mail, password, birthDate, level, userType);
     }
 
     @Override
@@ -65,7 +58,6 @@ public class User implements Serializable {
         if (obj == null || getClass() != obj.getClass()) return false;
         User other = (User) obj;
         return level == other.level
-            && dark_mode == other.dark_mode
             && Objects.equals(id, other.id)
             && Objects.equals(login, other.login)
             && Objects.equals(name, other.name)
@@ -74,14 +66,21 @@ public class User implements Serializable {
             && Objects.equals(password, other.password)
             && Objects.equals(birthDate, other.birthDate)
             && Objects.equals(userType, other.userType)
-            && Objects.equals(language, other.language);
+          ;
     }
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", login=" + login + ", name=" + name + ", lastName=" + lastName
-            + ", mail=" + mail + ", password=" + password + ", birthDate=" + birthDate
-            + ", level=" + level + ", userType=" + userType
-            + ", dark_mode=" + dark_mode + ", language=" + language + "]";
+        return "User [id=" + id 
+                + ", login=" + login 
+                + ", name=" + name 
+                + ", lastName=" + lastName
+                + ", mail=" + mail 
+                + ", password=" + password 
+                + ", birthDate=" + birthDate
+                + ", level=" + level 
+                + ", userType=" + userType 
+                + "]";
     }
+
 }

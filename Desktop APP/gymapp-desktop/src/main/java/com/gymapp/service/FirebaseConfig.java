@@ -33,4 +33,5 @@ public class FirebaseConfig {
     public static Firestore getDB() {
         return db;
     }
+    
 }
