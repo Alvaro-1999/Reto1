@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "retogym-1faac",
+  "private_key_id": "36aabc028e520492eaafddffca1ef0ffd9847464",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQChrRVH1w1TRon8\nbEpYF+L64rlMZZzwbeV8YJIHcAHDY7rhLyoV9b/nSBnVA9puUrdC3410P+J4pmPH\nGZJwofT90maZzwCxy+DYOhpjAbQDFV6oSSBlsD6P+UyQbk6biBGqW3SyHHgRRUVO\nVnSbpgwogaeycoh6dciMxc/d2pw7bkWP+55hH9vXCHVk2MmNVmcO6/WkzRM4yOk0\nTX2nK2yXyWYq82qldGaplI8ljN4+PnBI4E6TxpVt+LqZvjrgANSmiorJAwD7OYjN\nlG4JHgHya6HsmfTSPzlp/lxplr/AKa+laHgSrXC5bMAsAQaeFsdJiikWroweijV1\nPvJLiRp9AgMBAAECggEAAkelY1gff9CgqoFrwkvtRKTE1dR1qZhLIlK0THbiYiXP\ntqmKb46BxcT+WZgj0ObJXx/gPUbsrnneMf+6JmzKPngPP/+rdAEQKyG/9IHLeY2o\nF48XGLKrDIRd9YgbWKsgYKVzLah5cvjl7iG0TuuWWU3ha61HdRP1yjJnPirShYNV\n+RDyaVqp7iQSGn9nrrUlymzYeOIJ4BwC5Lbz2YchZ+Qf738F47RuHvI9Lzfqbcwi\nJHNwCNcRziUkvZ+8FRSvnEt2683Xq/MubS2XyggLjzFxsvq2NHpHqfL2MKYhWPhh\nKzsgor/FDZJlySbHKBVupndfeW8uqvJct9lej4z2UQKBgQDgEDdZDZ3Ea3FYzIdm\nbBCU4PcFolF0rqfXhVj8I59aFIoVCzV06ZZAa63PSgjSRWAhegzNrn4anPlO+eAg\njS42tHAK4bSpI8HrrR8NOTdeIPB8t5cyxCbqcBPbuxsA+88xSCeldK7XAafQ8Kwz\nzSRlqqrj1WtCOS1+cMBImhrnpQKBgQC4uG/KQIMque/HQhMCyvx2AjK9Bf0YJofW\nbw40GJUARTxRXhR2taOQjdtDflJUWaozf9tyyKFbx0VB9AnEOcWLcBMNkGQ7vKNq\nPiOT+khaEY+U0M4rCL5heON+KGp6u+8pSu9T1CEYrUG4GAqjlCpdN3M1VZRUtamh\nfbT7J7Sv+QKBgGFLaV1IJlvmc9+lYJ4/Cqw7S8ishUZvmP5jLxK9vTJ2fMdKiLnt\nvIrYty6t7UqxSV8ACpM91BBmXXPH2WUJKSokDAsNm09e8ZQPJs6tK7e6AfOGHSe0\nOVnPtS/S/ZTdw0iZFm4oTsuaMm7uMziDOezTwUURpXOqNHEVMMnV8RzpAoGBAJUu\nXxo4f7ZB9CQ4eKIIzVuA6vk9nOmkNJA5oH7yW2Ochtov4Nb+WtqjtjEME/GLeKme\n2NwarDYy+PwK2thez+uM19Zchpa4AkILbTBVMZmMFSlaeSbIKPkPaKq6eUQmA0CW\nBDLvXstPIYRL5ku1nYErByBLvT+sdxK1MzSjHIoBAoGANJrMRnzNJcWKBWXtN/Wb\n1b98SymKsFRsNVMaDJh0Tevx6zRwKzlmR8lEB8/peGTYpiyDoHC2cnHBu1Bn/o31\nbaQHHT2Pbh19BWTDjUEZJqzhkZD0YNFOIWUku5VD8HSe84+QatH2HArmmuGP6QaB\n6YqEhJ8Xto5oWtxnLihhteU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@retogym-1faac.iam.gserviceaccount.com",
+  "client_id": "108742008760630761449",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40retogym-1faac.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
